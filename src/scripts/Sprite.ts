@@ -7,8 +7,12 @@ interface ISpriteParams {
 }
 
 export class Sprite {
-    constructor(params: ISpriteParams) {
+	public img: HTMLImageElement;
+	private _params: ISpriteParams;
 
+	constructor(params: ISpriteParams) {
+		this._params = params;
+		this.loadImage();
     }
 
     public update(): void {
@@ -18,4 +22,8 @@ export class Sprite {
     public render(): void {
 
     }
+
+	private async loadImage() {
+		this.img = await Resources.loadImage(this._params.url);
+	}
 }

@@ -7,18 +7,10 @@ const vertexShaders = [
 
 
 class ViewPort {
-	private _ctx: CanvasRenderingContext2D;
-	private _gl: WebGLRenderingContext;
+	public ctx: CanvasRenderingContext2D = null;
+	public gl: WebGLRenderingContext = null;
 
 	constructor(public el: HTMLCanvasElement) {
-	}
-
-	get ctx(): CanvasRenderingContext2D {
-		return this._ctx || (this._ctx = this.el.getContext("2d"));
-	}
-
-	get gl(): WebGLRenderingContext {
-		return this._gl;
 	}
 
 	get width(): number {
@@ -29,11 +21,14 @@ class ViewPort {
 		return this.el.height;
 	}
 
-	_initWebGL(): void {
-		this._gl = null;
+	_init2DContext(){
+		this.ctx = this.el.getContext("2d");
+	}
 
+	_initWebGL(): void {
+		let e;
 		try {
-			this._gl = this.el.getContext("webgl") || this.el.getContext("experimental-webgl");
+			this.gl = this.el.getContext("webgl") || this.el.getContext("experimental-webgl");
 		}
 		catch (e) {
 		}
@@ -43,15 +38,14 @@ class ViewPort {
 
 class CanvasPlatform implements RenderPlatform {
 	public viewPort: ViewPort;
-	public gl: WebGLRenderingContext = null;
 	public ctx: CanvasRenderingContext2D;
 
 	constructor() {
+		this.ctx = this.viewPort.ctx;
 	}
 
 	public drawImage(...args): void {
-		const ctx = this.viewPort.ctx;
-		ctx.drawImage.apply(ctx, args);
+		this.ctx.drawImage.apply(this.ctx, args);
 	}
 
 	public clear(): void {
@@ -64,21 +58,19 @@ class CanvasPlatform implements RenderPlatform {
 class WebGLPlatform implements RenderPlatform {
 	public viewPort: ViewPort;
 	public gl: WebGLRenderingContext;
-	public ctx: CanvasRenderingContext2D = null;
 
 	constructor() {
-		console.log(this);
+		this.gl = this.viewPort.gl;
 		this._initGL();
 		this._initShaders();
 	}
 
-
 	public drawImage(image): void {
-		const gl = this.viewPort.gl;
+		const gl = this.gl;
 	}
 
 	public clear(): void {
-		const gl = this.viewPort.gl;
+		const gl = this.gl;
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
@@ -143,17 +135,10 @@ export class RenderPlatform {
 			(<any>Object).assign(this, WebGLPlatform.prototype);
 			WebGLPlatform.call(this);
 		} else {
+			this.viewPort._init2DContext();
 			(<any>Object).assign(this, CanvasPlatform.prototype);
 			CanvasPlatform.call(this);
 		}
-	}
-
-	public get gl(): WebGLRenderingContext {
-		return this.viewPort.gl;
-	}
-
-	public get ctx(): CanvasRenderingContext2D{
-		return this.viewPort.ctx;
 	}
 
 	public drawImage: (image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement, offsetX: number, offsetY: number, width?: number, height?: number, canvasOffsetX?: number, canvasOffsetY?: number, canvasImageWidth?: number, canvasImageHeight?: number) => void;

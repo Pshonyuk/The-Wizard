@@ -29,8 +29,8 @@ module.exports = tools.extendConfig({
 				exclude: ["/node_modules/"]
 			},
 			{
-				test: "\.glsl",
-				loader: "text-loader",
+				test: /\.glsl$/,
+				loader: "includes",
 				exclude: ["/node_modules/"]
 			}
 			// {
@@ -54,5 +54,27 @@ module.exports = tools.extendConfig({
 			// 	exclude: ["/node_modules/"]
 			// }
 		]
+	},
+	includes: {
+		extensions: function (filepath) {
+			let extensions;
+			if (/\.html$/.test(filepath)) {
+				extensions = ['', '.html', '.shtml', '.htm'];
+			} else if (/\.glsl$/.test(filepath)) {
+				extensions = ['', '.glsl', '.vert', '.frag'];
+			}
+			return extensions;
+		},
+		pattern: function (filepath) {
+			let pattern;
+			// only custom includes pattern for html
+			if (/\.html$/.test(filepath)) {
+				pattern = {
+					re: /<!--#\s*?include\s+?virtual=("|')(.+?)\1\s*?-->/,
+					index: 2
+				};
+			}
+			return pattern;
+		}
 	}
 });

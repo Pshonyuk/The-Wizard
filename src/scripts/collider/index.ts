@@ -1,0 +1,1 @@
+export { StaticCollider } from "./StaticCollider";

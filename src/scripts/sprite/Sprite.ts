@@ -6,6 +6,7 @@ interface ISpriteParams {
 	spriteSheet: SpriteSheet
 	frames: string[] | string
 	loop?: boolean,
+	scale?: number,
 	speed?: number,
 	position?: {x: number, y: number}
 }
@@ -18,6 +19,7 @@ export class Sprite {
 			frames: null,
 			loop: true,
 			speed: 10,
+			scale: 1,
 			position: { x: 0, y: 0 }
 		}
 	}
@@ -47,12 +49,22 @@ export class Sprite {
 		return this._params.loop;
 	}
 
+	public get scale(): number[] {
+		const scale = this._params.scale;
+		return Array.isArray(scale) ? scale.slice(0) : [scale, scale];
+	}
+
 	public get speed(): number {
 		return this._params.speed;
 	}
 
 	public get position(): {x: number, y: number} {
 		return { ...this._position };
+	}
+
+	public get activeFrame() {
+		const offset = Math.floor(this._offset);
+		return this.spriteSheet.frames[this.frames[offset]];
 	}
 
 	public moveX(deltaX: number): void {
@@ -88,10 +100,21 @@ export class Sprite {
 	}
 
 	public render(rp: RenderPlatform): void {
-		const spriteSheet = this.spriteSheet,
-			pos = this.position,
-			frame = spriteSheet.frames[this.frames[Math.floor(this._offset)]];
+		const pos = this.position,
+			scale = this.scale,
+			spriteSheet = this.spriteSheet,
+			frame = this.activeFrame;
 
-		rp.drawImage(spriteSheet.img, frame.x, frame.y, frame.w, frame.h, pos.x, pos.y, frame.w, frame.h);
+		rp.drawImage(
+			spriteSheet.img,
+			frame.x,
+			frame.y,
+			frame.w,
+			frame.h,
+			pos.x,
+			pos.y,
+			Math.round(frame.w * scale[0]),
+			Math.round(frame.h * scale[1])
+		);
 	}
 }

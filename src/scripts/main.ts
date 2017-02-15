@@ -1,34 +1,41 @@
 require("../styles/main.scss");
 import { RenderPlatform } from "./RenderPlatform";
 import { Resources } from "./Resources";
-import { Sprite } from "./Sprite";
+import { Sprite, SpriteSheet } from "./sprite/";
 import { Map } from "./Map";
 
 Resources.startSession();
 const el = <HTMLCanvasElement>document.getElementById("game-view-port"),
 	renderPlatform = new RenderPlatform(el),
 	map = new Map(),
-	sprite = new Sprite({
-		url: "./assets/sprites.png",
-		pos: [0, 0],
-		size: [342, 354],
-		speed: 6,
-		frames: [0, 1, 2, 3]
+	sprites: Sprite[] = [],
+	spriteSheet = new SpriteSheet({
+		url: "./assets/",
+		name: "spritesheet"
 	});
 
-// el.width = window.document.body.clientWidth;
+el.width = window.document.body.clientWidth;
 el.height = window.document.body.clientHeight;
+
+function createSprites() {
+	sprites.push(new Sprite({
+		spriteSheet,
+		speed: 6,
+		frames: spriteSheet.animations["walk"]
+	}));
+}
 
 function render() {
 	renderPlatform.clear();
 	map.render();
-	sprite.update(renderPlatform);
+	sprites.forEach(sprite => sprite.update(renderPlatform));
 	requestAnimationFrame(render);
 }
 
 
 Resources.stopSession();
 Resources.onLoad().then((data) => {
+	createSprites();
 	render();
 }).catch((err) => {
 

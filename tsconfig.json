@@ -2,9 +2,13 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es5",
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": true,
     "sourceMap": true
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "typings"
   ]
 }

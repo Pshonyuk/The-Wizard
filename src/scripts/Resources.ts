@@ -7,9 +7,9 @@ interface ISession {
 }
 
 const imagesCache: {[key: string]: HTMLImageElement} = {},
+	jsonCache: {[key: string]: any} = {},
 	sessions: ISession[] = [];
 let currentSessionId: number;
-
 
 
 export module Resources {
@@ -70,7 +70,6 @@ export module Resources {
 			}
 
 			const image = new Image();
-			image.src = url;
 
 			image.onload = () => {
 				image.onload = image.onerror = null;
@@ -85,6 +84,40 @@ export module Resources {
 				sessions[sessionId].reject(err);
 				reject(err);
 			};
+
+			image.src = url;
+		});
+
+	}
+
+	export function loadJson(url: string, sessionId: number = currentSessionId): Promise<any> {
+		const data = sessions[sessionId].data,
+			index: number = data.length;
+
+		sessions[sessionId].data.push(null);
+		url = url.trim();
+
+		return new Promise((resolve, reject) => {
+			if (jsonCache[url]) {
+				const json = JSON.parse(jsonCache[url]);
+				data[index] = json;
+				resolve(json);
+				checkLoad(sessionId);
+				return;
+			}
+
+			window.fetch(url).then((response: Response) => {
+				return response.text();
+			}).then((text: string) => {
+				const json = JSON.parse(text);
+				jsonCache[url] = text;
+				data[index] = json;
+				resolve(json);
+				checkLoad(sessionId);
+			}).catch(err => {
+				sessions[sessionId].reject(err);
+				reject(err);
+			});
 		});
 
 	}

@@ -58,6 +58,7 @@ class CanvasPlatform implements RenderPlatform {
 class WebGLPlatform implements RenderPlatform {
 	public viewPort: ViewPort;
 	public gl: WebGLRenderingContext;
+	public program: WebGLProgram;
 
 	constructor() {
 		this.gl = this.viewPort.gl;
@@ -66,7 +67,8 @@ class WebGLPlatform implements RenderPlatform {
 	}
 
 	public drawImage(image): void {
-		const gl = this.gl;
+		const gl = this.gl,
+			program = this.program;
 	}
 
 	public clear(): void {
@@ -84,27 +86,27 @@ class WebGLPlatform implements RenderPlatform {
 
 	private _initShaders(): void {
 		const gl = this.gl,
-			shaderProgram = gl.createProgram();
+			program = this.program = gl.createProgram();
 
 		vertexShaders.forEach(source => {
 			const shader = this._compileShader(source, "x-vertex");
-			gl.attachShader(shaderProgram, shader);
+			gl.attachShader(program, shader);
 		});
 
 		fragmentShaders.forEach(source => {
 			const shader = this._compileShader(source, "x-fragment");
-			gl.attachShader(shaderProgram, shader);
+			gl.attachShader(program, shader);
 		});
 
-		gl.linkProgram(shaderProgram);
+		gl.linkProgram(program);
 
-		if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 			console.error("Unable to initialize the shader program.");
 		}
 
-		gl.useProgram(shaderProgram);
+		gl.useProgram(program);
 
-		const vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+		const vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
 		gl.enableVertexAttribArray(vertexPositionAttribute);
 	}
 
@@ -129,7 +131,7 @@ export class RenderPlatform {
 
 	constructor(el: HTMLCanvasElement) {
 		this.viewPort = new ViewPort(el);
-		this.viewPort._initWebGL();
+		// this.viewPort._initWebGL();
 
 		if (this.viewPort.gl) {
 			(<any>Object).assign(this, WebGLPlatform.prototype);

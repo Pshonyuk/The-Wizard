@@ -7,6 +7,7 @@ interface ISpriteParams {
 	frames: string[] | string
 	loop?: boolean,
 	speed?: number,
+	position?: {x: number, y: number}
 }
 
 
@@ -16,17 +17,20 @@ export class Sprite {
 			spriteSheet: null,
 			frames: null,
 			loop: true,
-			speed: 10
+			speed: 10,
+			position: { x: 0, y: 0 }
 		}
 	}
 
-	public img: HTMLImageElement;
 	private _params: ISpriteParams;
 	private _offset: number;
 	private _time: number;
+	private _endAnimation: boolean;
+	private _position: {x: number, y: number};
 
 	constructor(params: ISpriteParams) {
 		this._params = (<any>Object).assign(Sprite.defaults, params);
+		this._position = { ...this._params.position };
 		this._offset = 0;
 	}
 
@@ -47,24 +51,47 @@ export class Sprite {
 		return this._params.speed;
 	}
 
-	public update(rp: RenderPlatform): void {
-		const deltaTime: number = Date.now();
+	public get position(): {x: number, y: number} {
+		return { ...this._position };
+	}
 
-		if (this._time) {
-			this._offset += (this._params.speed / 1000) * (deltaTime - this._time);
-			if (this._offset > this._params.frames.length) this._offset = 0;
+	public moveX(deltaX: number): void {
+		this._position.x += deltaX;
+	}
+
+	public moveY(deltaY: number): void {
+		this._position.y += deltaY;
+	}
+
+	public move(deltaX: number, deltaY: number): void {
+		this.moveX(deltaX);
+		this.moveY(deltaY);
+	}
+
+	public update(rp: RenderPlatform): void {
+		const frames = this.frames;
+
+		if (frames.length && !this._endAnimation) {
+			const deltaTime: number = Date.now();
+
+			if (this._time) {
+				this._offset += (this.speed / 1000) * (deltaTime - this._time);
+				if (this._offset >= frames.length) {
+					this._endAnimation = this.loop ? false : true;
+					this._offset = 0;
+				}
+			}
+			this._time = deltaTime;
 		}
 
-		this._time = deltaTime;
 		this.render(rp);
 	}
 
 	public render(rp: RenderPlatform): void {
-		// const pos = this._params.pos,
-		// 	size = this._params.size,
-		// 	sx = pos[0],
-		// 	sy = pos[1] + Math.floor(this._offset) * size[1];
-		//
-		// rp.drawImage(this.img, sx, sy, size[0], size[1], 0, 0, size[0], size[1]);
+		const spriteSheet = this.spriteSheet,
+			pos = this.position,
+			frame = spriteSheet.frames[this.frames[Math.floor(this._offset)]];
+
+		rp.drawImage(spriteSheet.img, frame.x, frame.y, frame.w, frame.h, pos.x, pos.y, frame.w, frame.h);
 	}
 }

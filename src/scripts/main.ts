@@ -23,6 +23,12 @@ function createSprites() {
 		speed: 6,
 		frames: spriteSheet.animations["walk"]
 	}));
+	sprites.push(new Sprite({
+		spriteSheet,
+		speed: 4,
+		position: {y: 400, x: 0},
+		frames: spriteSheet.animations["jump"]
+	}));
 }
 
 function render() {

@@ -24,9 +24,14 @@ module.exports = tools.extendConfig({
 				exclude: ["/node_modules/"]
 			},
 			{
-				// include: [ tools.getPath("src/styles") ],
 				test: /\.scss$/,
-				loaders: ["style", "css", "sass"]
+				loaders: ["style", "css", "sass"],
+				exclude: ["/node_modules/"]
+			},
+			{
+				test: "\.glsl",
+				loader: "text-loader",
+				exclude: ["/node_modules/"]
 			}
 			// {
 			// 	test: /\.scss$/,

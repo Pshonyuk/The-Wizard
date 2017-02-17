@@ -1,15 +1,15 @@
 require("../styles/main.scss");
-import { RenderPlatform } from "./RenderPlatform";
+import { RenderPlatform } from "./render-platform";
 import { Resources } from "./Resources";
 import { Sprite, SpriteSheet } from "./sprite/";
-import { StaticCollider } from "./collider";
+import { BasicCollider } from "./collider";
 import { Map } from "./Map";
 
 Resources.startSession();
 const el = <HTMLCanvasElement>document.getElementById("game-view-port"),
 	renderPlatform = new RenderPlatform(el),
 	map = new Map(),
-	gameObjects: (Sprite|StaticCollider)[] = [],
+	gameObjects: (Sprite|BasicCollider)[] = [],
 	characterSH = new SpriteSheet({
 		url: "./assets/sprites/",
 		name: "character"
@@ -22,56 +22,34 @@ const el = <HTMLCanvasElement>document.getElementById("game-view-port"),
 el.width = Math.round(window.document.body.clientWidth / 2);
 el.height = Math.round(window.document.body.clientHeight / 2);
 
-function getBottomY(frame, pos, scale = 1): number {
-	return el.height - pos - frame.h * scale;
-}
-
 function createGameObjects() {
 	gameObjects.push(...[
-		new StaticCollider([
-			new Sprite({
-				spriteSheet: tilesetSH,
-				frames: "tree2",
-				position: { x: 400, y: getBottomY(tilesetSH.frames["tree2"], 100) }
-			})
-		]),
-		new Sprite({
-			spriteSheet: characterSH,
-			speed: 9,
+		new BasicCollider({
 			scale: 0.5,
-			position: { x: 0, y: getBottomY(characterSH.frames[characterSH.animations["run"][0]], 40, 0.5) },
-			frames: characterSH.animations["run"]
-		}),
-		new StaticCollider([
-			new Sprite({
-				spriteSheet: tilesetSH,
-				frames: "tree3",
-				scale: 1.5,
-				position: { x: 0, y: getBottomY(tilesetSH.frames["tree3"], 0, 1.5) }
-			})
-		])
+			sprites: [
+				new Sprite({
+					spriteSheet: tilesetSH,
+					frames: tilesetSH.animations["flame"],
+					position: { x: 400, y: 0 }
+				})
+			]
+		})
 	]);
 }
 
 let time: number;
 function render() {
-	const deltaTime = Date.now(),
-		speed = 368;
+	const deltaTime = (Date.now() - time) / 1000;
+
 	renderPlatform.clear();
 	map.render();
 
-	gameObjects.forEach((gameObject: (Sprite| StaticCollider), i: number) => {
-		if (gameObject instanceof Sprite) {
-			gameObject.moveX(Math.floor((speed * (deltaTime - time)) / 1000));
-			if (gameObject.position.x > el.width) {
-				gameObject.moveX(-el.width - gameObject.activeFrame.w);
-			}
-		}
-
-		gameObject.update(renderPlatform);
+	gameObjects.forEach((gameObject: (Sprite| BasicCollider), i: number) => {
+		gameObject.update(deltaTime);
+		gameObject.render(renderPlatform);
 	});
 
-	time = deltaTime;
+	time = Date.now();
 	requestAnimationFrame(render);
 }
 
@@ -84,4 +62,3 @@ Resources.onLoad().then((data) => {
 }).catch((err) => {
 	console.error(err);
 });
-

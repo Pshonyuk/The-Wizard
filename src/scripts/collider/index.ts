@@ -1,1 +1,1 @@
-export { StaticCollider } from "./StaticCollider";
+export { BasicCollider } from "./BasicCollider";

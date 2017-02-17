@@ -21,7 +21,7 @@ class ViewPort {
 		return this.el.height;
 	}
 
-	_init2DContext(){
+	_init2DContext() {
 		this.ctx = this.el.getContext("2d");
 	}
 
@@ -50,8 +50,24 @@ class CanvasPlatform implements RenderPlatform {
 
 	public clear(): void {
 		const viewPort = this.viewPort;
-		this.ctx.clearRect(0, 0, viewPort.width, viewPort.height)
+		this.ctx.clearRect(0, 0, viewPort.width, viewPort.height);
 	}
+
+	public save(): void {
+		this.ctx.save();
+	};
+
+	public restore(): void {
+		this.ctx.restore();
+	};
+
+	public scale(x: number, y: number): void {
+		this.ctx.scale(x, y);
+	}
+
+	public translate(x: number, y: number): void {
+		this.ctx.translate(x, y);
+	};
 }
 
 
@@ -59,6 +75,11 @@ class WebGLPlatform implements RenderPlatform {
 	public viewPort: ViewPort;
 	public gl: WebGLRenderingContext;
 	public program: WebGLProgram;
+
+	public save: () => void;
+	public restore: () => void;
+	public scale: (x: number, y: number) => void;
+	public translate: (x: number, y: number) => void;
 
 	constructor() {
 		this.gl = this.viewPort.gl;
@@ -145,4 +166,8 @@ export class RenderPlatform {
 
 	public drawImage: (image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement, offsetX: number, offsetY: number, width?: number, height?: number, canvasOffsetX?: number, canvasOffsetY?: number, canvasImageWidth?: number, canvasImageHeight?: number) => void;
 	public clear: () => void;
+	public save: () => void;
+	public restore: () => void;
+	public scale: (x: number, y: number) => void;
+	public translate: (x: number, y: number) => void;
 }

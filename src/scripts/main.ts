@@ -25,12 +25,30 @@ el.height = Math.round(window.document.body.clientHeight / 2);
 function createGameObjects() {
 	gameObjects.push(...[
 		new BasicCollider({
-			scale: 0.5,
+			position: { x: 350, y: el.height - tilesetSH.frames["tree1"].h },
+			sprites: [
+				new Sprite({
+					spriteSheet: tilesetSH,
+					frames: "tree1"
+				})
+			]
+		}),
+		new BasicCollider({
+			position: { x: 320, y: el.height - tilesetSH.frames["flame_1"].h - tilesetSH.frames["tree1"].h },
 			sprites: [
 				new Sprite({
 					spriteSheet: tilesetSH,
 					frames: tilesetSH.animations["flame"],
-					position: { x: 400, y: 0 }
+				})
+			]
+		}),
+		new BasicCollider({
+			scale: 1,
+			position: { x: 0, y: el.height - characterSH.frames["idle_1"].h },
+			sprites: [
+				new Sprite({
+					spriteSheet: characterSH,
+					frames: characterSH.animations["idle"]
 				})
 			]
 		})

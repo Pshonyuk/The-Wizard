@@ -1,7 +1,7 @@
 import { RenderPlatform } from "../render-platform";
 import { Sprite } from "../sprite";
 
-declare type position2D = {x: number, y: number};
+export type position2D = {x: number, y: number};
 interface IStaticColliderParams {
 	type?: "static" | "rigidbody",
 	scale?: [number, number] | number,
